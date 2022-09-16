@@ -1,0 +1,59 @@
+#!/bin/bash
+
+nofity-it () {
+gdbus call --session \
+    --dest=org.freedesktop.Notifications \
+    --object-path=/org/freedesktop/Notifications \
+    --method=org.freedesktop.Notifications.Notify \
+    '' $IDSET "$icon" "$title" "$text" \
+    '[]' '{"urgency": <1>}' 2000
+}
+
+parse-id () {
+    sed 's/(uint32 \([0-9]\+\),)/\1/g'
+}
+
+IDSET=0
+wasoffc="true"
+wasoffn="true"
+
+while [ true ]
+do
+
+situc=$( xset -q | sed -n 's/^.*Caps Lock:\s*\(\S*\).*$/\1/p' )
+situn=$( xset -q | sed -n 's/^.*Num Lock:\s*\(\S*\).*$/\1/p' )
+
+if [ $situc == "on" ] && [ ${wasoffc} == "true" ];
+then
+    title="Caps Lock"
+    text="ON"
+    icon="/usr/share/icons/kbled-indicator/capson.png"
+    IDSET=$(nofity-it | parse-id)
+    wasoffc="false"
+fi
+if [ ${wasoffc} == "false" ] && [ $situc == "off" ];
+then
+    title="Caps Lock"
+    text="OFF"
+    icon="/usr/share/icons/kbled-indicator/capsoff.png"
+    IDSET=$(nofity-it | parse-id)
+    wasoffc="true"
+fi
+
+if [ $situn == "on" ] && [ ${wasoffn} == "true" ];
+then
+    title="Num Lock"
+    text="ON"
+    icon="/usr/share/icons/kbled-indicator/numon.png"
+    IDSET=$(nofity-it | parse-id)
+    wasoffn="false"
+fi
+if [ $situn == "off" ] && [ ${wasoffn} == "false" ];
+then
+    title="Num Lock"
+    text="OFF"
+    icon="/usr/share/icons/kbled-indicator/numoff.png"
+    IDSET=$(nofity-it | parse-id)
+    wasoffn="true"
+fi
+done
