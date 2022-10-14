@@ -56,4 +56,5 @@ then
     IDSET=$(nofity-it | parse-id)
     wasoffn="true"
 fi
+sleep 0.05
 done
